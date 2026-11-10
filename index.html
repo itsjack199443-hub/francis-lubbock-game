@@ -1,0 +1,431 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Francis Lubbock: Survive the Civil War</title>
+
+<style>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+}
+
+body{
+font-family:Arial,sans-serif;
+background:linear-gradient(to bottom,#002868,#ffffff,#bf0a30);
+min-height:100vh;
+padding:15px;
+color:white;
+}
+
+.container{
+max-width:800px;
+margin:auto;
+background:rgba(0,0,0,0.85);
+padding:20px;
+border-radius:20px;
+box-shadow:0 0 20px rgba(0,0,0,.5);
+}
+
+h1{
+text-align:center;
+font-size:2.2rem;
+margin-bottom:10px;
+}
+
+h2{
+text-align:center;
+color:gold;
+margin-bottom:15px;
+}
+
+.stats{
+display:grid;
+grid-template-columns:repeat(3,1fr);
+gap:10px;
+margin-bottom:15px;
+}
+
+.stat{
+background:#17375e;
+padding:12px;
+border-radius:10px;
+text-align:center;
+font-weight:bold;
+}
+
+#prideBar{
+height:24px;
+background:#444;
+border-radius:12px;
+overflow:hidden;
+margin-bottom:20px;
+}
+
+#prideFill{
+height:100%;
+width:50%;
+background:gold;
+transition:.5s;
+}
+
+#eventBox{
+background:#222;
+padding:20px;
+border-radius:15px;
+}
+
+#year{
+color:gold;
+font-weight:bold;
+margin-bottom:10px;
+}
+
+#eventTitle{
+margin-bottom:10px;
+}
+
+#eventText{
+margin-bottom:20px;
+line-height:1.5;
+}
+
+button{
+width:100%;
+padding:15px;
+margin-top:10px;
+font-size:16px;
+font-weight:bold;
+border:none;
+border-radius:10px;
+cursor:pointer;
+}
+
+#aBtn{
+background:#0d6efd;
+color:white;
+}
+
+#bBtn{
+background:#dc3545;
+color:white;
+}
+
+button:hover{
+opacity:.9;
+}
+
+#randomEvent{
+margin-top:15px;
+padding:10px;
+background:#333;
+border-left:5px solid gold;
+border-radius:6px;
+}
+
+#factBox{
+margin-top:15px;
+padding:10px;
+background:#111;
+border-left:5px solid cyan;
+border-radius:6px;
+}
+
+#restartBtn{
+display:none;
+background:green;
+color:white;
+}
+
+@media(max-width:600px){
+.stats{
+grid-template-columns:1fr;
+}
+}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+<h1>🤠 FRANCIS LUBBOCK</h1>
+<h2>SURVIVE THE CIVIL WAR</h2>
+
+<div class="stats">
+<div class="stat">📦 Supplies<br><span id="supplies">50</span></div>
+<div class="stat">🪖 Troops<br><span id="troops">50</span></div>
+<div class="stat">⭐ Support<br><span id="support">50</span></div>
+</div>
+
+<div>
+<b>🤠 Texas Pride</b>
+<div id="prideBar">
+<div id="prideFill"></div>
+</div>
+</div>
+
+<div id="eventBox">
+
+<div id="year"></div>
+
+<h3 id="eventTitle"></h3>
+
+<p id="eventText"></p>
+
+<button id="aBtn"></button>
+<button id="bBtn"></button>
+
+<div id="randomEvent"></div>
+
+<div id="factBox"></div>
+
+<button id="restartBtn">🔄 Play Again</button>
+
+</div>
+
+</div>
+
+<script>
+
+let supplies = 50;
+let troops = 50;
+let support = 50;
+let current = 0;
+
+const events = [
+{
+year:"1861",
+title:"Texas Considers Secession",
+text:"Texas is deciding whether to leave the Union.",
+a:"Support Secession",
+b:"Oppose Secession",
+effectA:{supplies:0,troops:10,support:10},
+effectB:{supplies:0,troops:-10,support:-15},
+fact:"Francis R. Lubbock became Governor of Texas in 1861."
+},
+{
+year:"1861",
+title:"Soldiers Need Food",
+text:"Texas troops are running low on supplies.",
+a:"Send Supplies",
+b:"Save Supplies",
+effectA:{supplies:-15,troops:15,support:5},
+effectB:{supplies:10,troops:-15,support:-5},
+fact:"Supplying troops was one of Texas's biggest wartime challenges."
+},
+{
+year:"1861",
+title:"Volunteer Wave",
+text:"Many Texans want to join the war effort.",
+a:"Train Volunteers",
+b:"Turn Them Away",
+effectA:{supplies:-10,troops:20,support:5},
+effectB:{supplies:0,troops:-5,support:-10},
+fact:"Thousands of Texans volunteered during the Civil War."
+},
+{
+year:"1862",
+title:"Road Problems",
+text:"Transportation routes need repairs.",
+a:"Repair Roads",
+b:"Ignore The Problem",
+effectA:{supplies:-15,troops:5,support:10},
+effectB:{supplies:0,troops:-5,support:-10},
+fact:"Roads were important for moving troops and supplies."
+},
+{
+year:"1862",
+title:"Equipment Shortage",
+text:"Troops need uniforms and equipment.",
+a:"Provide Equipment",
+b:"Delay Shipment",
+effectA:{supplies:-20,troops:15,support:5},
+effectB:{supplies:0,troops:-15,support:-5},
+fact:"Texas leaders worked to support Confederate troops."
+},
+{
+year:"1862",
+title:"Public Concerns",
+text:"Citizens are worried about the future.",
+a:"Give A Speech",
+b:"Ignore Concerns",
+effectA:{supplies:0,troops:0,support:15},
+effectB:{supplies:0,troops:0,support:-15},
+fact:"Public support was important for state leaders."
+},
+{
+year:"1863",
+title:"Final Decision",
+text:"Your term as governor is nearly over.",
+a:"Focus On Helping Texas",
+b:"Take It Easy",
+effectA:{supplies:-5,troops:10,support:15},
+effectB:{supplies:0,troops:-10,support:-15},
+fact:"Lubbock served as Governor from 1861 to 1863."
+}
+];
+
+const randomEvents = [
+{text:"🤠 Volunteer Cowboys Arrive! +10 Troops",supplies:0,troops:10,support:0},
+{text:"🌧️ Drought! -10 Supplies",supplies:-10,troops:0,support:0},
+{text:"📰 Good Press Coverage! +10 Support",supplies:0,troops:0,support:10},
+{text:"⚔️ Battle Losses! -10 Troops",supplies:0,troops:-10,support:0},
+{text:"🚂 Supply Train Arrives! +15 Supplies",supplies:15,troops:0,support:0},
+{text:"😠 Public Protest! -10 Support",supplies:0,troops:0,support:-10}
+];
+
+const yearEl = document.getElementById("year");
+const titleEl = document.getElementById("eventTitle");
+const textEl = document.getElementById("eventText");
+const factEl = document.getElementById("factBox");
+const randomEl = document.getElementById("randomEvent");
+
+function updateStats(){
+
+document.getElementById("supplies").textContent = supplies;
+document.getElementById("troops").textContent = troops;
+document.getElementById("support").textContent = support;
+
+let pride = Math.max(0,Math.min(100,(supplies+troops+support)/3));
+
+document.getElementById("prideFill").style.width =
+pride + "%";
+}
+
+function loadEvent(){
+
+if(supplies <= 0 || troops <= 0 || support <= 0){
+gameOver();
+return;
+}
+
+if(current >= events.length){
+winGame();
+return;
+}
+
+let e = events[current];
+
+yearEl.textContent = "Year: " + e.year;
+titleEl.textContent = e.title;
+textEl.textContent = e.text;
+
+document.getElementById("aBtn").textContent = e.a;
+document.getElementById("bBtn").textContent = e.b;
+
+factEl.innerHTML =
+"<b>📖 Historical Fact:</b><br>" + e.fact;
+}
+
+function choose(letter){
+
+let e = events[current];
+let effect = (letter === "A") ? e.effectA : e.effectB;
+
+supplies += effect.supplies;
+troops += effect.troops;
+support += effect.support;
+
+let random =
+randomEvents[Math.floor(Math.random()*randomEvents.length)];
+
+supplies += random.supplies;
+troops += random.troops;
+support += random.support;
+
+randomEl.innerHTML =
+"<b>🎲 Random Event:</b><br>" + random.text;
+
+updateStats();
+
+current++;
+
+setTimeout(loadEvent,700);
+}
+
+function gameOver(){
+
+titleEl.textContent = "💀 TEXAS IN CRISIS";
+textEl.textContent =
+"The challenges of wartime overwhelmed Texas.";
+
+hideButtons();
+showRestart();
+}
+
+function winGame(){
+
+let title;
+let text;
+
+if(supplies >= 70 && troops >= 70 && support >= 70){
+
+title = "👑 LONE STAR LEGEND";
+text = "Texas will remember your name forever.";
+
+}
+else if(
+supplies >= 50 &&
+troops >= 50 &&
+support >= 50
+){
+
+title = "🏆 GREAT GOVERNOR";
+text = "Texas remained strong under your leadership.";
+
+}
+else if(
+supplies >= 25 &&
+troops >= 25 &&
+support >= 25
+){
+
+title = "👍 SUCCESSFUL GOVERNOR";
+text = "You guided Texas through difficult times.";
+
+}
+else{
+
+title = "😬 BARELY SURVIVED";
+text = "Texas survived, but it wasn't easy.";
+
+}
+
+titleEl.textContent = title;
+textEl.textContent = text;
+
+hideButtons();
+showRestart();
+}
+
+function hideButtons(){
+
+document.getElementById("aBtn").style.display = "none";
+document.getElementById("bBtn").style.display = "none";
+
+}
+
+function showRestart(){
+
+document.getElementById("restartBtn").style.display = "block";
+
+}
+
+document.getElementById("aBtn")
+.addEventListener("click", () => choose("A"));
+
+document.getElementById("bBtn")
+.addEventListener("click", () => choose("B"));
+
+document.getElementById("restartBtn")
+.addEventListener("click", () => location.reload());
+
+updateStats();
+loadEvent();
+
+</script>
+
+</body>
+</html>
